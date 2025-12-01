@@ -1,0 +1,134 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(br.readLine());
+        int[] b = new int[2 * n];
+
+        // Read the 2n numbers
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int maxv = 0;
+
+        for (int i = 0; i < 2 * n; i++) {
+            b[i] = Integer.parseInt(st.nextToken());
+            maxv = Math.max(maxv, b[i]);
+        }
+
+        // ---- SPF (smallest prime factor) sieve ----
+        int[] spf = new int[maxv + 1];
+        ArrayList<Integer> primes = new ArrayList<>();
+
+        for (int i = 2; i <= maxv; i++) {
+            if (spf[i] == 0) {
+                spf[i] = i;
+                primes.add(i);
+                if ((long) i * i <= maxv) {
+                    for (long j = (long) i * i; j <= maxv; j += i) {
+                        if (spf[(int) j] == 0) spf[(int) j] = i;
+                    }
+                }
+            }
+        }
+
+        // Map prime value → index (1-based)
+        HashMap<Integer, Integer> primeIndex = new HashMap<>();
+        for (int i = 0; i < primes.size(); i++) {
+            primeIndex.put(primes.get(i), i + 1);
+        }
+
+        // Frequency array
+        int[] freq = new int[maxv + 1];
+        for (int x : b) freq[x]++;
+
+        ArrayList<Integer> ans = new ArrayList<>(n);
+
+        // ---- Process in descending order ----
+        for (int x = maxv; x >= 2; x--) {
+            while (freq[x] > 0) {
+                if (spf[x] == x) {
+                    // x is prime
+                    int idx = primeIndex.get(x);
+                    ans.add(idx);
+                    freq[x]--;
+                    freq[idx]--;
+                } else {
+                    // x is composite
+                    int d = x / spf[x];
+                    ans.add(x);
+                    freq[x]--;
+                    freq[d]--;
+                }
+            }
+        }
+
+        // Output exactly n numbers
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            sb.append(ans.get(i)).append(" ");
+        }
+        System.out.println(sb);
+    }
+}
+-------------------------------------------------- TC and SC----------------------------------------------
+⭐ Final Time Complexity
+
+Combine all:
+
+O(maxv · log log maxv)  +  O(n)
+
+
+Since maxv ≈ 2.7 million and n ≤ 200,000:
+
+✔️ Final TC ≈ O(2.7M · log log 2.7M) + O(200K)
+✔️ This fits easily within 2 seconds
+🧠 Why fast?
+
+Sieve runs up to 2.7M → fast
+
+All other work is linear in n → also fast
+
+✅ Space Complexity (SC)
+
+What data do we store?
+
+SPF array:
+
+int[] spf = new int[maxv + 1]; 
+→ size = maxv ≈ 2.7M
+
+
+freq array:
+
+int[] freq = new int[maxv + 1];
+→ another 2.7M
+
+
+primes list:
+~200,000 integers
+
+primeIndex HashMap:
+~200,000 entries
+
+b array:
+size = 2n ≤ 400,000
+
+ans array:
+size = n ≤ 200,000
+
+⭐ Final Space Complexity
+O(maxv)  +  O(n)
+
+
+maxv dominates.
+
+✔️ SC ≈ O(2.7M)
+✔️ Fits easily in 256 MB
+🎯 Final Answer
+Time Complexity:
+O(maxv · log log maxv + n)
+
+Space Complexity:
+O(maxv + n)
