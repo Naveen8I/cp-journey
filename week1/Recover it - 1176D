@@ -105,7 +105,6 @@ freq array:
 int[] freq = new int[maxv + 1];
 → another 2.7M
 
-
 primes list:
 ~200,000 integers
 
