@@ -1,0 +1,71 @@
+import java.util.*;
+
+public class Main {
+    static int n, k;
+    static int[] a;
+
+    static boolean check(int X) {
+        // Case 1: odd positions must be <= X
+        int cnt = 0;
+        int need = 1; // 1 = odd, 2 = even
+
+        for (int v : a) {
+            if (need == 1) { // odd position
+                if (v <= X) {
+                    cnt++;
+                    need = 2;
+                }
+            } else { // even position (no restriction)
+                cnt++;
+                need = 1;
+            }
+        }
+        if (cnt >= k) return true;
+
+        // Case 2: even positions must be <= X
+        cnt = 0;
+        need = 1;
+
+        for (int v : a) {
+            if (need == 2) { // even restricted
+                if (v <= X) {
+                    cnt++;
+                    need = 1;
+                }
+            } else { // odd unrestricted
+                cnt++;
+                need = 2;
+            }
+        }
+        return cnt >= k;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        n = sc.nextInt();
+        k = sc.nextInt();
+        a = new int[n];
+        int max = 0;
+
+        for (int i = 0; i < n; i++) {
+            a[i] = sc.nextInt();
+            max = Math.max(max, a[i]);
+        }
+
+        int L = 1, R = max, ans = max;
+        while (L <= R) {
+            int mid = (L + R) / 2;
+            if (check(mid)) {
+                ans = mid;
+                R = mid - 1;
+            } else {
+                L = mid + 1;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+---------------------------------Time and Space Complexity--------------------------------
+TC : O(nlog(max(a)))
+SC : O(1)
