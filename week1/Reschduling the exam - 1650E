@@ -1,0 +1,103 @@
+import java.util.*;
+
+public class Main {
+
+    // -------- check() FUNCTION (same logic as C++) --------
+    static boolean check(ArrayList<Integer> a, int req, int d) {
+        int n = a.size();
+
+        // Check all gaps >= req
+        for (int i = 1; i < n; i++) {
+            int gap = a.get(i) - a.get(i - 1) - 1;
+            if (gap < req) return false;
+        }
+
+        // Check placing at the END
+        if (d - a.get(n - 1) - 1 >= req) return true;
+
+        // Check splitting inside a very big gap
+        for (int i = 1; i < n; i++) {
+            int gap = a.get(i) - a.get(i - 1) - 1;
+            if (gap >= 2 * req) return true;
+        }
+
+        return false;
+    }
+
+    // -------- solve() FUNCTION (same logic as C++) --------
+    static void solve(Scanner sc) {
+        int n = sc.nextInt();
+        int d = sc.nextInt();
+
+        ArrayList<Integer> a = new ArrayList<>();
+        a.add(0); // same as C++ (padding a[0])
+
+        for (int i = 1; i <= n; i++) {
+            a.add(sc.nextInt());
+        }
+
+        int mi = Integer.MAX_VALUE, freq = 0, idx = 0, idx2 = 0;
+
+        // Find smallest gap
+        for (int i = 1; i < n; i++) {
+            int mu = a.get(i) - a.get(i - 1) - 1;
+            if (mu < mi) {
+                mi = mu;
+                idx = i;
+                freq = 0;
+                idx2 = i - 1;
+            }
+            if (mu == mi) freq++;
+        }
+
+        // If more than 2 minimal gaps, can't fix
+        if (freq > 2) {
+            System.out.println(mi);
+            return;
+        }
+
+        int ans = mi;
+        ArrayList<Integer> b = new ArrayList<>(a);  // backup
+
+        // ---- Try removing exam at idx ----
+        {
+            ArrayList<Integer> temp = new ArrayList<>(a);
+            temp.remove(idx);
+
+            int lo = mi, hi = d;
+            while (lo <= hi) {
+                int mid = (lo + hi) / 2;
+                if (check(temp, mid, d)) {
+                    ans = mid;
+                    lo = mid + 1;
+                } else hi = mid - 1;
+            }
+        }
+
+        // ---- Try removing exam at idx2 ----
+        if (idx2 != 0) {
+            ArrayList<Integer> temp = new ArrayList<>(b);
+            temp.remove(idx2);
+
+            int lo = mi, hi = d;
+            while (lo <= hi) {
+                int mid = (lo + hi) / 2;
+                if (check(temp, mid, d)) {
+                    ans = Math.max(ans, mid);
+                    lo = mid + 1;
+                } else hi = mid - 1;
+            }
+        }
+
+        System.out.println(ans);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        while (t-- > 0) solve(sc);
+    }
+}
+------------------------------------Time and Space Complexity-----------------------
+TC -- O(nlogd)
+SC -- O(n)
