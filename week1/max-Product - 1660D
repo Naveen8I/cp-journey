@@ -1,0 +1,103 @@
+import java.util.*;
+
+public class Main {
+
+    static class Pair {
+        int x, y;
+        Pair(int x, int y) { this.x = x; this.y = y; }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+
+        while (t-- > 0) {
+            int n = sc.nextInt();
+            int[] a = new int[n];
+            for (int i = 0; i < n; i++) a[i] = sc.nextInt();
+
+            int bestTwos = -1;
+            int bestL = 0, bestR = -1;
+
+            int L = 0;
+            while (L < n) {
+
+                // skip zeros — they split segments
+                if (a[L] == 0) {
+                    // empty segment has product 1
+                    if (bestTwos < 0) { 
+                        bestTwos = 0;
+                        bestL = 0; bestR = -1;
+                    }
+                    L++;
+                    continue;
+                }
+
+                int R = L;
+                // find segment without zeros
+                while (R < n && a[R] != 0) R++;
+
+                // process segment [L, R-1]
+                int negCount = 0;
+                int totalTwos = 0;
+
+                for (int i = L; i < R; i++) {
+                    if (a[i] < 0) negCount++;
+                    if (Math.abs(a[i]) == 2) totalTwos++;
+                }
+
+                // If even negatives: whole segment is good
+                if (negCount % 2 == 0) {
+                    if (totalTwos > bestTwos) {
+                        bestTwos = totalTwos;
+                        bestL = L;
+                        bestR = R - 1;
+                    }
+                } else {
+                    // Odd negatives → remove prefix or suffix
+                    // Find first and last negative
+                    int firstNeg = -1, lastNeg = -1;
+
+                    for (int i = L; i < R; i++)
+                        if (a[i] < 0) { firstNeg = i; break; }
+
+                    for (int i = R - 1; i >= L; i--)
+                        if (a[i] < 0) { lastNeg = i; break; }
+
+                    // Option 1: trim prefix up to firstNeg
+                    int tw1 = 0;
+                    for (int i = firstNeg + 1; i < R; i++)
+                        if (Math.abs(a[i]) == 2) tw1++;
+
+                    // Option 2: trim suffix from lastNeg
+                    int tw2 = 0;
+                    for (int i = L; i < lastNeg; i++)
+                        if (Math.abs(a[i]) == 2) tw2++;
+
+                    // choose better option
+                    if (tw1 > bestTwos) {
+                        bestTwos = tw1;
+                        bestL = firstNeg + 1;
+                        bestR = R - 1;
+                    }
+                    if (tw2 > bestTwos) {
+                        bestTwos = tw2;
+                        bestL = L;
+                        bestR = lastNeg - 1;
+                    }
+                }
+
+                L = R;
+            }
+
+            // Convert bestL..bestR into deletions x and y
+            int x = bestL;
+            int y = (bestR == -1 ? n : (n - 1 - bestR));
+
+            System.out.println(x + " " + y);
+        }
+    }
+}
+------------------------------------------------------ TC and SC -----------------------------------------------------------------
+TC : O(N)
+SC :O(1)
