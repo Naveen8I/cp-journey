@@ -1,0 +1,185 @@
+Find the Grid of Region Average
+https://leetcode.com/problems/find-the-grid-of-region-average/
+Code:
+import java.util.*;
+
+class Solution {
+    public int[][] resultGrid(int[][] image, int threshold) {
+        int m = image.length;
+        int n = image[0].length;
+
+        int[][] sum = new int[m][n];
+        int[][] count = new int[m][n];
+
+        // Check if a 3x3 region starting at (r, c) is valid
+        boolean isValid(int r, int c) {
+            for (int i = r; i < r + 3; i++) {
+                for (int j = c; j < c + 3; j++) {
+                    if (i + 1 < r + 3 &&
+                        Math.abs(image[i][j] - image[i + 1][j]) > threshold)
+                        return false;
+
+                    if (j + 1 < c + 3 &&
+                        Math.abs(image[i][j] - image[i][j + 1]) > threshold)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        // Process all 3x3 subgrids
+        for (int i = 0; i <= m - 3; i++) {
+            for (int j = 0; j <= n - 3; j++) {
+                if (isValid(i, j)) {
+                    int total = 0;
+                    for (int x = i; x < i + 3; x++) {
+                        for (int y = j; y < j + 3; y++) {
+                            total += image[x][y];
+                        }
+                    }
+
+                    int avg = total / 9;
+
+                    for (int x = i; x < i + 3; x++) {
+                        for (int y = j; y < j + 3; y++) {
+                            sum[x][y] += avg;
+                            count[x][y]++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build result grid
+        int[][] result = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (count[i][j] > 0) {
+                    result[i][j] = sum[i][j] / count[i][j];
+                } else {
+                    result[i][j] = image[i][j];
+                }
+            }
+        }
+
+        return result;
+    }
+}
+
+--------------------------------------------------------------------------------
+https://leetcode.com/problems/minimum-time-to-revert-word-to-initial-state-i/ and https://leetcode.com/problems/minimum-time-to-revert-word-to-initial-state-ii/
+Minimum Time to Revert Word to Initial State I & II
+Code:
+(Brute Force - Baby Steps)
+//T.C : O(n^2)
+//S.C : O(1)
+public class Solution {
+    private boolean check(String word, int i) {
+        int j = 0;
+
+        while (i < word.length()) {
+            if (word.charAt(i) == word.charAt(j)) {
+                i++;
+                j++;
+            } else {
+                break;
+            }
+        }
+
+        return i == word.length();
+    }
+
+    public int minimumTimeToInitialState(String word, int k) {
+        int n = word.length();
+
+        int count = 1;
+        int i = k;
+
+        while (i < n) {
+            if (check(word, i)) {
+                break;
+            }
+
+            count++;
+            i += k;
+        }
+
+        return count;
+    }
+}
+
+
+
+//Approach-2 (Brute Force - Smartly Clean Approach)
+//T.C : O(n^2)
+//S.C : O(1)
+public class Solution {
+    private boolean check(String word, int i, int n) {
+        return word.substring(i, n).equals(word.substring(0, n - i));
+    }
+
+    public int minimumTimeToInitialState(String word, int k) {
+        int n = word.length();
+
+        int count = 1;
+        int i = k;
+
+        while (i < n) {
+            if (check(word, i, n)) {
+                break;
+            }
+
+            count++;
+            i += k;
+        }
+
+        return count;
+    }
+}
+------
+(Optimal using KMP LPS)
+//T.C : O(n)
+//S.C : O(n)
+public class Solution {
+
+    // Copy paste of KMP LPS which I taught
+    void LPS(String word, int[] lps, int n) {
+        int len = 0;
+        lps[0] = 0;
+
+        int i = 1;
+        while (i < n) {
+            if (word.charAt(i) == word.charAt(len)) {
+                len++;
+                lps[i] = len;
+                i++;
+            } else {
+                if (len != 0) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+    }
+
+    int minimumTimeToInitialState(String word, int k) {
+        int n = word.length();
+
+        int[] lps = new int[n];
+        LPS(word, lps, n);
+
+        int maxLps = lps[n - 1];
+
+        while (maxLps > 0 && (n - maxLps) % k != 0) {
+            maxLps = lps[maxLps - 1];
+        }
+
+        if ((n - maxLps) % k == 0) {
+            return (n - maxLps) / k;
+        }
+
+        return (int) Math.ceil(n / (double) k); // or, (n + k - 1)/k
+    }
+}
