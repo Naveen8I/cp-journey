@@ -1,0 +1,78 @@
+MAXimum number of elements in a subset(problem 2)
+https://leetcode.com/problems/find-the-maximum-number-of-elements-in-subset/
+Code:
+class Solution {
+    public int maximumLength(int[] nums) {
+        HashMap<Integer,Integer> map = new HashMap<>();
+        for(int i = 0; i < nums.length; i++){
+            map.put(nums[i],map.getOrDefault(nums[i],0)+1);
+        }
+        int mL = 0;
+
+        for(int key : map.keySet()){
+            int val = map.get(key);
+            if(val > 1){
+                for(int = 2; i < 10; i += 2){
+                    int num = (int)Math.pow(val,i);
+                    if(map.containsKey(num) && num > 1)continue;
+                    else{
+                        mL = Math.max(i-1,mL);
+                    }
+                }
+            }
+        }
+        return mL;
+    }
+}
+
+-----------------------------------------------------------------------------------
+Alice and Bob Playing Flower Game
+https://leetcode.com/problems/alice-and-bob-playing-flower-game/
+code:
+class Solution {
+    public long flowerGame(int n, int m) {
+         long oddN = (n + 1) / 2;   
+        long evenN = n / 2;        
+        long oddM = (m + 1) / 2;   
+        long evenM = m / 2;        
+
+        return oddN * evenM + evenN * oddM;
+    }
+}
+
+------------------------------------------------------------------------------------------
+Minimize OR of Remaining Elements Using Operations
+https://leetcode.com/problems/minimize-or-of-remaining-elements-using-operations/
+code:
+
+class Solution {
+    public int minOrAfterOperations(int[] nums, int k) {
+       int ans = 0;
+        int n = nums.length;
+
+        for (int bit = 29; bit >= 0; bit--) {
+            int target = ans | ((1 << bit) - 1);
+
+            int groups = 0;
+            int cur = (1 << 30) - 1; 
+
+            for (int num : nums) {
+                cur &= num;
+                if ((cur | target) == target) {
+                    groups++;
+                    cur = (1 << 30) - 1;
+                }
+            }
+
+            if (cur != (1 << 30) - 1) {
+                groups++;
+            }
+
+            
+            if (n - groups > k) {
+                ans |= (1 << bit);
+            }
+        }
+        return ans;
+    }
+}
